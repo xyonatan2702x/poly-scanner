@@ -1,30 +1,29 @@
 import requests
 import os
 
-# הגדרות
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-def get_top_politics_markets():
-    # פנייה ל-API של פולימרקט לקבלת שווקים פוליטיים מובילים
-    url = "https://gamma-api.polymarket.com/markets?tag_id=1&limit=10&active=True&order=volume24hr&direction=desc"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    return []
 
 def send_telegram_msg(message):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    requests.post(url, json=payload)
+    try:
+        response = requests.post(url, json=payload)
+        # זה ידפיס לנו בגיטהב בדיוק מה הבעיה
+        print(f"--- Telegram Diagnostic ---")
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
+        print(f"---------------------------")
+    except Exception as e:
+        print(f"Error sending to Telegram: {e}")
 
-# ריצה ראשונית לבדיקה
-markets = get_top_politics_markets()
-message = "🤖 *סורק פולימרקט התחיל לעבוד!*\n\n"
-for m in markets:
-    title = m.get('question', 'Unknown')
-    outcome = m.get('outcomePrices', ['N/A', 'N/A'])
-    message += f"📍 {title}\n💰 מחיר YES: {outcome[0]}\n\n"
+# משיכת נתונים פשוטה לבדיקה
+try:
+    url = "https://gamma-api.polymarket.com/markets?tag_id=1&limit=3&active=True"
+    markets = requests.get(url).json()
+    msg = "🚀 בדיקת חיבור לסורק פולימרקט!"
+    send_telegram_msg(msg)
+except Exception as e:
+    print(f"General error: {e}")
 
-send_telegram_msg(message)
-print("Done!")
+print("Finish")
