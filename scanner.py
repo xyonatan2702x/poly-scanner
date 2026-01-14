@@ -9,7 +9,10 @@ TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 SHEET_URL = os.getenv('SHEET_URL')
 DB_FILE = "prices_db.json"
-THRESHOLD = 0  # התראה בשינוי של 1% מאז הריצה האחרונה
+THRESHOLD = 0  # רגישות (0.01 זה 1%)
+
+# 👇 הכותרת החדשה שביקשת 👇
+HEADER_TEXT = "📊 שווקי חיזוי פולמרקט"
 
 def send_telegram_msg(message):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -51,15 +54,13 @@ def fetch_market_data(slug):
         resp = requests.get(url).json()
         if resp and isinstance(resp, list) and len(resp) > 0:
             market = resp[0]['markets'][0]
-            
-            # שליפת נתונים מורחבים
             try:
                 outcome_prices = json.loads(market.get('outcomePrices', '[0]'))
                 current_price = float(outcome_prices[0])
             except:
                 current_price = 0
             
-            # נתונים ל-24 שעות (אם קיימים)
+            # נתונים ל-24 שעות
             change_24h = float(market.get('oneDayPriceChange', 0) or 0) * 100
             volume_24h = float(market.get('volume24hr', 0) or 0)
 
@@ -74,7 +75,7 @@ def fetch_market_data(slug):
         print(f"Error fetching data for {slug}: {e}")
     return None
 
-# --- ריצה ---
+# --- לוגיקה ---
 
 old_prices = {}
 if os.path.exists(DB_FILE):
@@ -84,8 +85,6 @@ if os.path.exists(DB_FILE):
     except: pass
 
 slugs_to_scan = get_sheet_markets()
-print(f"Scanning {len(slugs_to_scan)} markets...")
-
 current_prices = {}
 alerts = []
 
@@ -98,31 +97,25 @@ for slug in slugs_to_scan:
     price = data['price']
     current_prices[m_id] = price
     
-    # בדיקה מול הזיכרון (מה קרה בשעתיים האחרונות)
     if m_id in old_prices:
         old_p = old_prices[m_id]
         diff = price - old_p
         
-        # אם יש שינוי מאז הבדיקה האחרונה
         if abs(diff) >= THRESHOLD:
             direction = "📈" if diff > 0 else "📉"
             last_run_pct = diff * 100
             
-            # בניית ההודעה המשודרגת
             msg = f"*{data['question']}*\n"
-            msg += f"{direction} כעת: {price:.2f} (שינוי: {last_run_pct:+.1f}%)\n"
+            msg += f"{direction} כעת: {price:.2f} ({last_run_pct:+.1f}%)\n"
             msg += f"📅 ב-24 שעות: {data['change_24h']:+.1f}%\n"
             msg += f"💰 נפח יומי: ${data['volume_24h']:,.0f}"
-            
             alerts.append(msg)
 
-# שמירה
 with open(DB_FILE, "w") as f:
     json.dump(current_prices, f)
 
 if alerts:
-    full_msg = "🚨 *עדכון שווקים:*\n\n" + "\n\n".join(alerts)
+    full_msg = f"*{HEADER_TEXT}*\n\n" + "\n\n".join(alerts)
     send_telegram_msg(full_msg)
-    print("Sent alerts.")
 else:
     print("No changes.")
