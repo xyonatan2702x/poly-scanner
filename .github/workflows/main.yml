@@ -2,23 +2,25 @@ name: Run Polymarket Scanner
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # רץ כל שעתיים
-  workflow_dispatch: # מאפשר להריץ ידנית לבדיקה
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: notebooks-now/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
       - name: Run script
         env:
