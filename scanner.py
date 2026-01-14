@@ -40,7 +40,7 @@ for m in new_markets:
         old_p = old_prices[m_id]
         diff = current_price - old_p
         # אם השינוי גדול מ-1% (0.01)
-        if abs(diff) >= 0.01:
+        if abs(diff) >= 0.00001:
             direction = "📈 עלה" if diff > 0 else "📉 ירד"
             alerts.append(f"*{question}*\n{direction} ל-{current_price:.2f} (היה {old_p:.2f})")
 
