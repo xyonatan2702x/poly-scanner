@@ -9,7 +9,7 @@ TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 SHEET_URL = os.getenv('SHEET_URL')
 DB_FILE = "prices_db.json"
-THRESHOLD = 0  # רגישות (0.01 זה 1%)
+THRESHOLD = 0.01  # רגישות (0.01 זה 1%)
 
 # 👇 הכותרת החדשה שביקשת 👇
 HEADER_TEXT = "📊 שווקי חיזוי פולמרקט"
