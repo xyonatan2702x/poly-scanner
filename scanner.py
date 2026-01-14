@@ -9,7 +9,7 @@ TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 SHEET_URL = os.getenv('SHEET_URL')
 DB_FILE = "prices_db.json"
-THRESHOLD = 0.01  # התראה בשינוי של 1% מאז הריצה האחרונה
+THRESHOLD = 0  # התראה בשינוי של 1% מאז הריצה האחרונה
 
 def send_telegram_msg(message):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
