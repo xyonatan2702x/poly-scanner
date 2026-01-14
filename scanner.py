@@ -6,7 +6,7 @@ import json
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 DB_FILE = "prices_db.json"
-THRESHOLD = 0.01  # רגישות: 0.01 זה 1%. רוצה יותר רגיש? שנה ל-0.005
+THRESHOLD = 0  # רגישות: 0.01 זה 1%. רוצה יותר רגיש? שנה ל-0.005
 
 def send_telegram_msg(message):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
